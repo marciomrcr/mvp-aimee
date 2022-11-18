@@ -1,0 +1,39 @@
+npm init -y
+npm i typescript -D
+npx tsc --init
+npm i fastify
+npm i @fastify/cors
+npm i tsx -D
+npm i prisma -D
+npm i @prisma/client
+npx prisma init 
+npx prisma migrate dev
+
+# Alterar package.json
+"scripts": {
+    "dev": "tsx watch src/server.ts"
+  },
+  
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+
+  
+npx prisma db seed
+npx prisma studio
+
+
+# Diagrama ERD
+npm i prisma-erd-generator @mermaid-js/mermaid-cli -D
+
+#Altear schema.prisma adicionar: 
+generator erd {
+  provider = "prisma-erd-generator"
+}
+npx prisma generate
+
+#Validação de dados
+npm i zod 
+
+#Geração de id automático para o code do bolão
+npm i short-unique-id

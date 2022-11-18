@@ -1,0 +1,358 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  email      String?  @unique
+  role       Role     @default(USER)
+  status     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updateddAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("usuarios")
+}
+
+model People {
+  id           String @id @default(cuid())
+  peopleTypeId String
+
+  peopleType     PeopleType       @relation(fields: [peopleTypeId], references: [id])
+  PhysicalPerson PhysicalPerson[]
+  LegalPerson    LegalPerson[]
+  Customer       Customer[]
+  Supplier       Supplier[]
+  branchOffice   BranchOffice[]
+
+  @@map("pessoas")
+}
+
+//Física ou Jurídica
+model PeopleType {
+  id          String   @id @default(cuid())
+  description String   @unique
+  People      People[]
+}
+
+//Conusumidor ou Fornecedor
+model Customer {
+  customerId String
+
+  people    People      @relation(fields: [customerId], references: [id])
+  OrderSale OrderSale[]
+
+  @@id([customerId])
+  @@map("consumidor")
+}
+
+model Supplier {
+  supplierId String
+
+  people        People          @relation(fields: [supplierId], references: [id])
+  OrderPurchase OrderPurchase[]
+
+  @@id([supplierId])
+  @@map("fornecedor")
+}
+
+//Filial
+model BranchOffice {
+  branchOfficeId String
+
+  people        People          @relation(fields: [branchOfficeId], references: [id])
+  Stock         Stock[]
+  stockMovement stockMovement[]
+  OrderSale     OrderSale[]
+  OrderPurchase OrderPurchase[]
+
+  @@id([branchOfficeId])
+  @@map("filial")
+}
+
+model PhysicalPerson {
+  physicalPersonId String
+  isCustomer       Boolean   @default(true)
+  isSupllier       Boolean   @default(false)
+  name             String    @unique
+  cpf              String?   @db.Char(11)
+  identity         String?   @db.Char(10)
+  birthDate        DateTime? @db.Date
+  whatsApp         String    @unique @db.Char(11)
+  status           Boolean   @default(true)
+  creditLimit      Decimal   @db.Decimal(7, 2)
+
+  createdAt  DateTime @default(now())
+  updateddAt DateTime @updatedAt
+  people     People   @relation(fields: [physicalPersonId], references: [id])
+
+  @@id([physicalPersonId])
+  @@index([name])
+  @@map("pessoa_fisica")
+}
+
+model LegalPerson {
+  legalPersonId     String
+  isSupllier        Boolean  @default(true)
+  isCustomer        Boolean  @default(false)
+  name              String   @unique
+  contactName       String?
+  cnpj              String?  @unique @db.Char(14)
+  whatsApp          String?  @unique
+  email             String   @unique
+  instagram         String?  @unique
+  stateRegistration String?  @unique @db.Char(14)
+  foundingDate      DateTime @db.Date
+  pixkey            String?  @unique
+  creditLimit       Decimal  @db.Decimal(7, 2)
+  createdAt         DateTime @default(now())
+  updateddAt        DateTime @updatedAt
+  status            Boolean  @default(true)
+
+  people People @relation(fields: [legalPersonId], references: [id])
+
+  @@id([legalPersonId])
+  @@index([name])
+  @@map("pessoa_juridica")
+}
+
+model Brand {
+  id           String    @id @default(cuid())
+  name         String    @unique
+  manufacturer String?
+  description  String?
+  status       Boolean   @default(true)
+  Product      Product[]
+  createdAt    DateTime  @default(now())
+  updateddAt   DateTime  @updatedAt
+
+  @@index([name])
+  @@map("marcas")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updateddAt  DateTime  @updatedAt
+  product     Product[]
+
+  @@map("categorias")
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  categoryId  String
+  brandId     String
+  name        String  @unique
+  description String?
+  size        String?
+  colors      String?
+  status      Boolean @default(true)
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  brand          Brand            @relation(fields: [brandId], references: [id])
+  category       Category         @relation(fields: [categoryId], references: [id])
+  productStock   Stock[]
+  stockMovement  stockMovement[]
+  Price          Price[]
+  //purchasedItems purchasedItems[]
+  OrderSaleItems OrderSaleItems[]
+
+  @@index([name])
+  @@map("produtos")
+}
+
+model Stock {
+  branchOfficeId String
+  productId      String
+  amount         Int
+  min_stock      Int?
+  createdAt      DateTime @default(now())
+  updateddAt     DateTime @updatedAt
+
+  product       Product         @relation(fields: [productId], references: [id])
+  branchOffice  BranchOffice    @relation(fields: [branchOfficeId], references: [branchOfficeId])
+  ReservedStock ReservedStock[]
+
+  @@id([branchOfficeId, productId])
+  @@map("estoque")
+}
+
+model ReservedStock {
+  branchOfficeId String
+  productId      String
+
+  amount     Int
+  createdAt  DateTime @default(now())
+  updateddAt DateTime @updatedAt
+  stock      Stock    @relation(fields: [branchOfficeId, productId], references: [branchOfficeId, productId])
+
+  @@id([branchOfficeId, productId])
+  @@map("estoque_reservado")
+}
+
+model stockMovement {
+  id             String   @id @default(cuid())
+  branchOfficeId String
+  productId      String
+  entryOutput    String   @db.Char(1)
+  amount         Int
+  createdAt      DateTime @default(now())
+  updateddAt     DateTime @updatedAt
+
+  branchOffice BranchOffice @relation(fields: [branchOfficeId], references: [branchOfficeId])
+  product      Product      @relation(fields: [productId], references: [id])
+
+  @@map("movimento_estoque")
+}
+
+//Venda, compra, devolução, troca
+model Operation {
+  id            String          @id @default(cuid())
+  name          String
+  Order         OrderSale[]
+  OrderPurchase OrderPurchase[]
+
+  @@map("operacoes")
+}
+
+//Aberto, Fechado, Cancelado
+model OperationStatus {
+  id            String          @id @default(cuid())
+  descripion    String
+  Order         OrderSale[]
+  OrderPurchase OrderPurchase[]
+
+  @@map("status_venda")
+}
+
+model OrderSale {
+  id                String @id @default(cuid())
+  operationId       String
+  operationStatusId String
+  emitterId         String
+  customerId        String
+
+  createdAt  DateTime @default(now())
+  updateddAt DateTime @updatedAt
+
+  branchOffice    BranchOffice     @relation(fields: [emitterId], references: [branchOfficeId])
+  customer        Customer         @relation(fields: [customerId], references: [customerId])
+  operation       Operation        @relation(fields: [operationId], references: [id])
+  operationStatus OperationStatus  @relation(fields: [operationStatusId], references: [id])
+  OrderSaleItems  OrderSaleItems[]
+
+  @@map("venda")
+}
+
+model OrderPurchase {
+  id                String @id @default(cuid())
+  operationId       String
+  operationStatusId String
+  branchOfficeId    String
+  supplierId        String
+
+  createdAt  DateTime @default(now())
+  updateddAt DateTime @updatedAt
+
+  branchOffice    BranchOffice    @relation(fields: [branchOfficeId], references: [branchOfficeId])
+  operation       Operation       @relation(fields: [operationId], references: [id])
+  operationStatus OperationStatus @relation(fields: [operationStatusId], references: [id])
+  supllier        Supplier        @relation(fields: [supplierId], references: [supplierId])
+
+  @@map("pedido_compra")
+}
+
+model OrderSaleItems {
+  orderSaleId String
+  productId   String
+  mount       Int
+  unitPrice   Decimal @db.Decimal(7, 2)
+  discount    Decimal @default(0) @db.Decimal(7, 2)
+  sum_total   Decimal @db.Decimal(7, 2)
+
+  OrderSale OrderSale @relation(fields: [orderSaleId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@id([orderSaleId, productId])
+  @@map("iten_Pedido_venda")
+}
+
+// model purchasedItems {
+//   purchaseId String
+//   productId  String
+//   mount      Int
+//   unitPrice  Decimal  @db.Decimal(7, 2)
+//   discount   Decimal  @db.Decimal(7, 2)
+//   sum_total  Decimal  @db.Decimal(7, 2)
+//   barCode    String?  @unique
+//   purchase   Purchase @relation(fields: [purchaseId], references: [id])
+//   product    Product  @relation(fields: [productId], references: [id])
+
+//   @@id([purchaseId, productId])
+//   @@map("itens_comprados")
+// }
+
+model Price {
+  productId     String
+  PurchasePrice Decimal  @db.Decimal(7, 2)
+  saleprice     Decimal  @db.Decimal(7, 2)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@id([productId])
+  @@map("precos")
+}
+
+// model Purchase {
+//   id               String           @id @default(cuid())
+//   deliveryForecast DateTime         @db.Date
+//   createdAt        DateTime         @default(now())
+//   updatedAt        DateTime         @updatedAt
+//   purchasedItems   purchasedItems[]
+
+//   @@map("compras")
+// }
+
+model Income {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("receitas")
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("despesas")
+}
