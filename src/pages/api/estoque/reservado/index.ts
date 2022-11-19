@@ -26,6 +26,11 @@ export default async function handlerReservedStock(
 
     case "POST":
       const { branchOfficeId, productId, amount } = req.body;
+      if (!branchOfficeId || !productId || !amount) {
+        return resp.status(200).json({
+          message: "Todos os campos devem ser preenchidos",
+        });
+      }
       const reservedStockExists = await prisma.reservedStock.findUnique({
         where: {
           branchOfficeId_productId: {
@@ -34,11 +39,27 @@ export default async function handlerReservedStock(
           },
         },
       });
+
       if (reservedStockExists) {
-        return resp.status(400).json({
-          message: "Produto já possui reserva! Favor alterar a quantidade!",
+        // return resp.status(400).json({
+        //   message: "Produto já possui reserva! Favor alterar a quantidade",
+        // });
+        const post = await prisma.reservedStock.update({
+          where: {
+            branchOfficeId_productId: {
+              productId,
+              branchOfficeId,
+            },
+          },
+
+          data: { amount: amount },
+        });
+
+        return resp.status(200).json({
+          message: "Reserva do Produto atualizada para: " + post.amount,
         });
       }
+
       const createReservedStock = await prisma.reservedStock.create({
         data: {
           branchOfficeId,
