@@ -50,27 +50,6 @@ model PeopleType {
   People      People[]
 }
 
-//Conusumidor ou Fornecedor
-model Customer {
-  customerId String
-
-  people    People      @relation(fields: [customerId], references: [id])
-  OrderSale OrderSale[]
-
-  @@id([customerId])
-  @@map("consumidor")
-}
-
-model Supplier {
-  supplierId String
-
-  people        People          @relation(fields: [supplierId], references: [id])
-  OrderPurchase OrderPurchase[]
-
-  @@id([supplierId])
-  @@map("fornecedor")
-}
-
 //Filial
 model BranchOffice {
   branchOfficeId String
@@ -85,6 +64,27 @@ model BranchOffice {
   @@map("filial")
 }
 
+//Conusumidor ou Fornecedor
+
+model Supplier {
+  supplierId String
+
+  people        People          @relation(fields: [supplierId], references: [id])
+  OrderPurchase OrderPurchase[]
+
+  @@id([supplierId])
+  @@map("fornecedor")
+}
+
+model Customer {
+  customerId String
+  people     People      @relation(fields: [customerId], references: [id])
+  OrderSale  OrderSale[]
+
+  @@id([customerId])
+  @@map("consumidor")
+}
+
 model PhysicalPerson {
   physicalPersonId String
   isCustomer       Boolean   @default(true)
@@ -96,10 +96,9 @@ model PhysicalPerson {
   whatsApp         String    @unique @db.Char(11)
   status           Boolean   @default(true)
   creditLimit      Decimal   @db.Decimal(7, 2)
-
-  createdAt  DateTime @default(now())
-  updateddAt DateTime @updatedAt
-  people     People   @relation(fields: [physicalPersonId], references: [id])
+  createdAt        DateTime  @default(now())
+  updateddAt       DateTime  @updatedAt
+  people           People    @relation(fields: [physicalPersonId], references: [id])
 
   @@id([physicalPersonId])
   @@index([name])

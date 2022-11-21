@@ -35,6 +35,7 @@ export default async function handlerCategory(
           description,
         },
       });
+
       return resp.status(201).json(createCategory);
   }
 }
