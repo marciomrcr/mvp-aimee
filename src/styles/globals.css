@@ -26,10 +26,11 @@ a:visited {
 
 header {
   background: linear-gradient(180deg, #102347 0%, #181818 100%);
-  height: 220px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-top: 60px;
 }
 
 .logo-container {
@@ -39,7 +40,9 @@ header {
 }
 
 .logo-container img {
-  width: 235px;
+  width: 100px;
+  height: 80;
+  /* padding-top: 30px; */
 }
 
 .logo-container h1 {
@@ -56,11 +59,12 @@ header {
   background-color: #283142;
   border-radius: 10px;
   padding: 30px 10px;
+  margin-top: -22px;
 }
 
 .container {
   width: 100%;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -76,18 +80,19 @@ header {
 
 .form-control-container {
   margin-bottom: 16px;
-  max-width: 300px;
+  max-width: 244px;
 }
 
 .form-control {
   width: 100%;
-  height: 46px;
+  height: 42px;
   background-color: #1b2531;
   border: 1px solid #384459;
   border-radius: 5px;
   color: #9aaabe;
   padding: 0 20px;
   font-size: 18px;
+  text-align: center;
 }
 
 .sales-table {

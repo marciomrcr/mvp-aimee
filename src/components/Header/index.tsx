@@ -10,8 +10,6 @@ export default function Header() {
           alt="Picture of notification"
           width={130}
           height={114}
-          // blurDataURL="data:..." automatically provided
-          // placeholder="blur" // Optional blur-up while loading
         />
       </div>
     </header>
