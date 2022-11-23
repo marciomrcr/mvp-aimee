@@ -7,8 +7,8 @@ export default function NotificationButton() {
       <Image
         src={notificationIcon}
         alt="Picture of notification"
-        // width={500} automatically provided
-        // height={500} automatically provided
+        //width=
+        //height={36} //automatically provided
         // blurDataURL="data:..." automatically provided
         // placeholder="blur" // Optional blur-up while loading
       />
